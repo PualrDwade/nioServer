@@ -1,7 +1,5 @@
 package com.pualrdwade.nioserver;
 
-import com.pualrdwade.nioserver.io.nio.NioSocket;
-
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -27,12 +25,12 @@ public class MessageWriter {
         }
     }
 
-    public void write(NioSocket nioSocket, ByteBuffer byteBuffer) throws IOException {
+    public void write(Socket socket, ByteBuffer byteBuffer) throws IOException {
         byteBuffer.put(this.messageInProgress.sharedArray, this.messageInProgress.offset + this.bytesWritten,
                 this.messageInProgress.length - this.bytesWritten);
         byteBuffer.flip();
 
-        this.bytesWritten += nioSocket.write(byteBuffer);
+        this.bytesWritten += socket.write(byteBuffer);
         byteBuffer.clear();
 
         if (bytesWritten >= this.messageInProgress.length) {

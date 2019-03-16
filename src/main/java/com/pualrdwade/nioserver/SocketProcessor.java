@@ -1,6 +1,4 @@
-package com.pualrdwade.nioserver.io.nio;
-
-import com.pualrdwade.nioserver.*;
+package com.pualrdwade.nioserver;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -13,9 +11,9 @@ import java.util.*;
  * @author PualrDwade
  * @apiNote 核心处理类, 作为消费者, 消费socket队列中
  */
-public class NioSocketProcessor implements Runnable {
+public class SocketProcessor implements Runnable {
 
-    private Queue<NioSocket> inboundNioSocketQueue = null;
+    private Queue<Socket> inboundSocketQueue = null;
 
     private MessageBuffer readMessageBuffer = null; // todo Not used now - but perhaps will be later - to check for
     // space in the buffer before reading from sockets
@@ -27,7 +25,7 @@ public class NioSocketProcessor implements Runnable {
 
     private Queue<Message> outboundMessageQueue = new LinkedList<>(); // todo use a better / faster queue.
 
-    private Map<Long, NioSocket> socketMap = new HashMap<>();
+    private Map<Long, Socket> socketMap = new HashMap<>();
 
     private ByteBuffer readByteBuffer = ByteBuffer.allocate(1024 * 1024);
     private ByteBuffer writeByteBuffer = ByteBuffer.allocate(1024 * 1024);
@@ -40,13 +38,13 @@ public class NioSocketProcessor implements Runnable {
     private long nextSocketId = 16 * 1024; // start incoming socket ids from 16K - reserve bottom ids for pre-defined
     // sockets (servers).
 
-    private Set<NioSocket> emptyToNonEmptyNioSockets = new HashSet<>();
-    private Set<NioSocket> nonEmptyToEmptyNioSockets = new HashSet<>();
+    private Set<Socket> emptyToNonEmptySockets = new HashSet<>();
+    private Set<Socket> nonEmptyToEmptySockets = new HashSet<>();
 
-    public NioSocketProcessor(Queue<NioSocket> inboundNioSocketQueue, MessageBuffer readMessageBuffer,
-                              MessageBuffer writeMessageBuffer, IMessageReaderFactory messageReaderFactory,
-                              IMessageProcessor messageProcessor) throws IOException {
-        this.inboundNioSocketQueue = inboundNioSocketQueue;
+    public SocketProcessor(Queue<Socket> inboundSocketQueue, MessageBuffer readMessageBuffer,
+                           MessageBuffer writeMessageBuffer, IMessageReaderFactory messageReaderFactory,
+                           IMessageProcessor messageProcessor) throws IOException {
+        this.inboundSocketQueue = inboundSocketQueue;
 
         this.readMessageBuffer = readMessageBuffer;
         this.writeMessageBuffer = writeMessageBuffer;
@@ -83,23 +81,23 @@ public class NioSocketProcessor implements Runnable {
     }
 
     public void takeNewSockets() throws IOException {
-        NioSocket newNioSocket = this.inboundNioSocketQueue.poll();
+        Socket newSocket = this.inboundSocketQueue.poll();
 
-        while (newNioSocket != null) {
-            newNioSocket.socketId = this.nextSocketId++;
-            newNioSocket.socketChannel.configureBlocking(false);
+        while (newSocket != null) {
+            newSocket.socketId = this.nextSocketId++;
+            newSocket.socketChannel.configureBlocking(false);
 
-            newNioSocket.messageReader = this.messageReaderFactory.createMessageReader();
-            newNioSocket.messageReader.init(this.readMessageBuffer);
+            newSocket.messageReader = this.messageReaderFactory.createMessageReader();
+            newSocket.messageReader.init(this.readMessageBuffer);
 
-            newNioSocket.messageWriter = new MessageWriter();
+            newSocket.messageWriter = new MessageWriter();
 
-            this.socketMap.put(newNioSocket.socketId, newNioSocket);
+            this.socketMap.put(newSocket.socketId, newSocket);
 
-            SelectionKey key = newNioSocket.socketChannel.register(this.readSelector, SelectionKey.OP_READ);
-            key.attach(newNioSocket);
+            SelectionKey key = newSocket.socketChannel.register(this.readSelector, SelectionKey.OP_READ);
+            key.attach(newSocket);
 
-            newNioSocket = this.inboundNioSocketQueue.poll();
+            newSocket = this.inboundSocketQueue.poll();
         }
     }
 
@@ -122,13 +120,13 @@ public class NioSocketProcessor implements Runnable {
     }
 
     private void readFromSocket(SelectionKey key) throws IOException {
-        NioSocket nioSocket = (NioSocket) key.attachment();
-        nioSocket.messageReader.read(nioSocket, this.readByteBuffer);
+        Socket socket = (Socket) key.attachment();
+        socket.messageReader.read(socket, this.readByteBuffer);
 
-        List<Message> fullMessages = nioSocket.messageReader.getMessages();
+        List<Message> fullMessages = socket.messageReader.getMessages();
         if (fullMessages.size() > 0) {
             for (Message message : fullMessages) {
-                message.socketId = nioSocket.socketId;
+                message.socketId = socket.socketId;
                 this.messageProcessor.process(message, this.writeProxy); // the message processor will eventually push
                 // outgoing messages into an IMessageWriter for
                 // this socket.
@@ -136,9 +134,9 @@ public class NioSocketProcessor implements Runnable {
             fullMessages.clear();
         }
 
-        if (nioSocket.endOfStreamReached) {
-            System.out.println("Socket closed: " + nioSocket.socketId);
-            this.socketMap.remove(nioSocket.socketId);
+        if (socket.endOfStreamReached) {
+            System.out.println("Socket closed: " + socket.socketId);
+            this.socketMap.remove(socket.socketId);
             key.attach(null);
             key.cancel();
             key.channel().close();
@@ -166,12 +164,12 @@ public class NioSocketProcessor implements Runnable {
             while (keyIterator.hasNext()) {
                 SelectionKey key = keyIterator.next();
 
-                NioSocket nioSocket = (NioSocket) key.attachment();
+                Socket socket = (Socket) key.attachment();
 
-                nioSocket.messageWriter.write(nioSocket, this.writeByteBuffer);
+                socket.messageWriter.write(socket, this.writeByteBuffer);
 
-                if (nioSocket.messageWriter.isEmpty()) {
-                    this.nonEmptyToEmptyNioSockets.add(nioSocket);
+                if (socket.messageWriter.isEmpty()) {
+                    this.nonEmptyToEmptySockets.add(socket);
                 }
 
                 keyIterator.remove();
@@ -183,32 +181,32 @@ public class NioSocketProcessor implements Runnable {
     }
 
     private void registerNonEmptySockets() throws ClosedChannelException {
-        for (NioSocket nioSocket : emptyToNonEmptyNioSockets) {
-            nioSocket.socketChannel.register(this.writeSelector, SelectionKey.OP_WRITE, nioSocket);
+        for (Socket socket : emptyToNonEmptySockets) {
+            socket.socketChannel.register(this.writeSelector, SelectionKey.OP_WRITE, socket);
         }
-        emptyToNonEmptyNioSockets.clear();
+        emptyToNonEmptySockets.clear();
     }
 
     private void cancelEmptySockets() {
-        for (NioSocket nioSocket : nonEmptyToEmptyNioSockets) {
-            SelectionKey key = nioSocket.socketChannel.keyFor(this.writeSelector);
+        for (Socket socket : nonEmptyToEmptySockets) {
+            SelectionKey key = socket.socketChannel.keyFor(this.writeSelector);
 
             key.cancel();
         }
-        nonEmptyToEmptyNioSockets.clear();
+        nonEmptyToEmptySockets.clear();
     }
 
     private void takeNewOutboundMessages() {
         Message outMessage = this.outboundMessageQueue.poll();
         while (outMessage != null) {
-            NioSocket nioSocket = this.socketMap.get(outMessage.socketId);
+            Socket socket = this.socketMap.get(outMessage.socketId);
 
-            if (nioSocket != null) {
-                MessageWriter messageWriter = nioSocket.messageWriter;
+            if (socket != null) {
+                MessageWriter messageWriter = socket.messageWriter;
                 if (messageWriter.isEmpty()) {
                     messageWriter.enqueue(outMessage);
-                    nonEmptyToEmptyNioSockets.remove(nioSocket);
-                    emptyToNonEmptyNioSockets.add(nioSocket); // not necessary if removed from nonEmptyToEmptySockets in prev.
+                    nonEmptyToEmptySockets.remove(socket);
+                    emptyToNonEmptySockets.add(socket); // not necessary if removed from nonEmptyToEmptySockets in prev.
                     // statement.
                 } else {
                     messageWriter.enqueue(outMessage);

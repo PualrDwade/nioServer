@@ -3,7 +3,7 @@ package com.pualrdwade.nioserver.http;
 import com.pualrdwade.nioserver.IMessageReader;
 import com.pualrdwade.nioserver.Message;
 import com.pualrdwade.nioserver.MessageBuffer;
-import com.pualrdwade.nioserver.io.nio.NioSocket;
+import com.pualrdwade.nioserver.Socket;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -31,8 +31,8 @@ public class HttpMessageReader implements IMessageReader {
     }
 
     @Override
-    public void read(NioSocket nioSocket, ByteBuffer byteBuffer) throws IOException {
-        nioSocket.read(byteBuffer);
+    public void read(Socket socket, ByteBuffer byteBuffer) throws IOException {
+        socket.read(byteBuffer);
         byteBuffer.flip();
 
         if (byteBuffer.remaining() == 0) {

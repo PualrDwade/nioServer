@@ -1,4 +1,4 @@
-package com.pualrdwade.nioserver.io.nio;
+package com.pualrdwade.nioserver;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -10,16 +10,16 @@ import java.util.concurrent.BlockingQueue;
  * @author PualrDwade
  * @apiNote socket接受者, 传入chanel管道
  */
-public class NioSocketAccepter implements Runnable {
+public class SocketAccepter implements Runnable {
 
     private int tcpPort = 0;
     private ServerSocketChannel serverSocket = null;
 
-    private BlockingQueue<NioSocket> nioSocketQueue = null;
+    private BlockingQueue<Socket> socketQueue = null;
 
-    public NioSocketAccepter(int tcpPort, BlockingQueue<NioSocket> nioSocketQueue) {
+    public SocketAccepter(int tcpPort, BlockingQueue<Socket> socketQueue) {
         this.tcpPort = tcpPort;
-        this.nioSocketQueue = nioSocketQueue;
+        this.socketQueue = socketQueue;
     }
 
     public void run() {
@@ -41,7 +41,7 @@ public class NioSocketAccepter implements Runnable {
                 // 放入socket阻塞队列中,生产者-消费者
                 //todo 检查队列是否可以放入更多的socket,目前直接使用阻塞队列进行阻塞
                 try {
-                    this.nioSocketQueue.put(new NioSocket(socketChannel));
+                    this.socketQueue.put(new Socket(socketChannel));
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }

@@ -1,7 +1,4 @@
-package com.pualrdwade.nioserver.io.nio;
-
-import com.pualrdwade.nioserver.IMessageReader;
-import com.pualrdwade.nioserver.MessageWriter;
+package com.pualrdwade.nioserver;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -11,7 +8,7 @@ import java.nio.channels.SocketChannel;
  * @author PualrDwade
  * @apiNote 封装socketChanel
  */
-public class NioSocket {
+public class Socket {
 
     public long socketId;
 
@@ -21,10 +18,10 @@ public class NioSocket {
 
     public boolean endOfStreamReached = false;
 
-    public NioSocket() {
+    public Socket() {
     }
 
-    public NioSocket(SocketChannel socketChannel) {
+    public Socket(SocketChannel socketChannel) {
         this.socketChannel = socketChannel;
     }
 

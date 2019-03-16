@@ -1,8 +1,5 @@
-package com.pualrdwade.nioserver.io.nio;
+package com.pualrdwade.nioserver;
 
-import com.pualrdwade.nioserver.IMessageProcessor;
-import com.pualrdwade.nioserver.IMessageReaderFactory;
-import com.pualrdwade.nioserver.MessageBuffer;
 import com.pualrdwade.nioserver.configure.ServerConfigure;
 
 import java.io.IOException;
@@ -16,8 +13,8 @@ import java.util.concurrent.BlockingQueue;
  */
 public class NioServer {
 
-    private NioSocketAccepter nioSocketAccepter = null;
-    private NioSocketProcessor nioSocketProcessor = null;
+    private SocketAccepter socketAccepter = null;
+    private SocketProcessor socketProcessor = null;
     private int tcpPort = 0;
     private IMessageReaderFactory messageReaderFactory = null;
     private IMessageProcessor messageProcessor = null;
@@ -38,17 +35,17 @@ public class NioServer {
         // 创建socket队列
         System.out.println("初始化服务器配置...");
         //创建Socket阻塞队列,使用生产者/消费者模型共享阻塞队列
-        BlockingQueue<NioSocket> nioSocketQueue = new ArrayBlockingQueue<>(ServerConfigure.SOCKET_QUERE_CAPACITY);
+        BlockingQueue<Socket> socketQueue = new ArrayBlockingQueue<>(ServerConfigure.SOCKET_QUERE_CAPACITY);
         //初始化
-        this.nioSocketAccepter = new NioSocketAccepter(tcpPort, nioSocketQueue);
+        this.socketAccepter = new SocketAccepter(tcpPort, socketQueue);
         MessageBuffer readBuffer = new MessageBuffer();
         MessageBuffer writeBuffer = new MessageBuffer();
-        this.nioSocketProcessor = new NioSocketProcessor(nioSocketQueue, readBuffer, writeBuffer, this.messageReaderFactory,
+        this.socketProcessor = new SocketProcessor(socketQueue, readBuffer, writeBuffer, this.messageReaderFactory,
                 this.messageProcessor);
 
         // 单一线程,非阻塞IO
-        Thread accepterThread = new Thread(this.nioSocketAccepter);
-        Thread processorThread = new Thread(this.nioSocketProcessor);
+        Thread accepterThread = new Thread(this.socketAccepter);
+        Thread processorThread = new Thread(this.socketProcessor);
         System.out.println("启动socketAccepter工作线程");
         // 启动接受者
         accepterThread.start();
