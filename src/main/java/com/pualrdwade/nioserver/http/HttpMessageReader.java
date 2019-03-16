@@ -3,7 +3,7 @@ package com.pualrdwade.nioserver.http;
 import com.pualrdwade.nioserver.IMessageReader;
 import com.pualrdwade.nioserver.Message;
 import com.pualrdwade.nioserver.MessageBuffer;
-import com.pualrdwade.nioserver.NioSocket;
+import com.pualrdwade.nioserver.io.nio.NioSocket;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;

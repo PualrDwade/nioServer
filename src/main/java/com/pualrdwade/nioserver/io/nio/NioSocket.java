@@ -1,4 +1,7 @@
-package com.pualrdwade.nioserver;
+package com.pualrdwade.nioserver.io.nio;
+
+import com.pualrdwade.nioserver.IMessageReader;
+import com.pualrdwade.nioserver.MessageWriter;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;

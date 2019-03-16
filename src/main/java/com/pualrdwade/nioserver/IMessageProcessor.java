@@ -6,6 +6,12 @@ package com.pualrdwade.nioserver;
  */
 public interface IMessageProcessor {
 
+    /**
+     * 处理message
+     *
+     * @param request
+     * @param writeProxy
+     */
     public void process(Message request, WriteProxy writeProxy);
 
 }

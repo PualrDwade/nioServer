@@ -1,5 +1,7 @@
 package com.pualrdwade.nioserver;
 
+import com.pualrdwade.nioserver.io.nio.NioSocket;
+
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.List;

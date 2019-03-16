@@ -1,4 +1,6 @@
-package com.pualrdwade.nioserver;
+package com.pualrdwade.nioserver.io.nio;
+
+import com.pualrdwade.nioserver.*;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -11,7 +13,7 @@ import java.util.*;
  * @author PualrDwade
  * @apiNote 核心处理类, 作为消费者, 消费socket队列中
  */
-public class SocketProcessor implements Runnable {
+public class NioSocketProcessor implements Runnable {
 
     private Queue<NioSocket> inboundNioSocketQueue = null;
 
@@ -41,9 +43,9 @@ public class SocketProcessor implements Runnable {
     private Set<NioSocket> emptyToNonEmptyNioSockets = new HashSet<>();
     private Set<NioSocket> nonEmptyToEmptyNioSockets = new HashSet<>();
 
-    public SocketProcessor(Queue<NioSocket> inboundNioSocketQueue, MessageBuffer readMessageBuffer,
-                           MessageBuffer writeMessageBuffer, IMessageReaderFactory messageReaderFactory,
-                           IMessageProcessor messageProcessor) throws IOException {
+    public NioSocketProcessor(Queue<NioSocket> inboundNioSocketQueue, MessageBuffer readMessageBuffer,
+                              MessageBuffer writeMessageBuffer, IMessageReaderFactory messageReaderFactory,
+                              IMessageProcessor messageProcessor) throws IOException {
         this.inboundNioSocketQueue = inboundNioSocketQueue;
 
         this.readMessageBuffer = readMessageBuffer;

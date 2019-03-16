@@ -1,6 +1,6 @@
 package com.pualrdwade.nioserver.bootstrap;
 
-import com.pualrdwade.nioserver.NioServer;
+import com.pualrdwade.nioserver.io.nio.NioServer;
 import com.pualrdwade.nioserver.configure.ServerConfigure;
 import com.pualrdwade.nioserver.http.HttpMessageProcessor;
 import com.pualrdwade.nioserver.http.HttpMessageReaderFactory;
