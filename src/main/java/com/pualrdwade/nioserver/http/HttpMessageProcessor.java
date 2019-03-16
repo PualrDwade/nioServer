@@ -26,7 +26,7 @@ public class HttpMessageProcessor implements IMessageProcessor {
                 + "<html><body>Hello World!</body></html>";
         byte[] httpResponseBytes = httpResponse.getBytes(StandardCharsets.UTF_8);
         System.out.println("Message Received from socket: " + request.socketId + "--reported by" + this);
-        System.out.println("message content" + request.metaData);
+        System.out.println("message content:" + request.metaData);
         Message response = writeProxy.getMessage();
         response.socketId = request.socketId;
         response.writeToMessage(httpResponseBytes);

@@ -50,8 +50,8 @@ public class Server {
         System.out.println("启动socketAccepter工作线程");
         // 启动接受者
         accepterThread.start();
-        // 启动处理者线程
         System.out.println("启动socketProcessor工作线程");
+        // 启动处理者线程
         processorThread.start();
         System.out.println("服务器已经启动,监听端口:" + tcpPort);
     }

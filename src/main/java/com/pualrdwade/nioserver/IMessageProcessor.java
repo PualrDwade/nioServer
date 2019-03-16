@@ -1,7 +1,8 @@
 package com.pualrdwade.nioserver;
 
 /**
- * Created by jjenkov on 16-10-2015.
+ * @author PualrDwade
+ * @apiNote Message的处理者接口
  */
 public interface IMessageProcessor {
 
