@@ -6,6 +6,7 @@ import java.nio.channels.ClosedChannelException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.util.*;
+import java.util.concurrent.BlockingQueue;
 
 /**
  * @author PualrDwade
@@ -13,7 +14,7 @@ import java.util.*;
  */
 public class SocketProcessor implements Runnable {
 
-    private Queue<Socket> inboundSocketQueue = null;
+    private BlockingQueue<Socket> inboundSocketQueue = null;
 
     private MessageBuffer readMessageBuffer = null; // todo Not used now - but perhaps will be later - to check for
     // space in the buffer before reading from sockets
@@ -41,7 +42,7 @@ public class SocketProcessor implements Runnable {
     private Set<Socket> emptyToNonEmptySockets = new HashSet<>();
     private Set<Socket> nonEmptyToEmptySockets = new HashSet<>();
 
-    public SocketProcessor(Queue<Socket> inboundSocketQueue, MessageBuffer readMessageBuffer,
+    public SocketProcessor(BlockingQueue<Socket> inboundSocketQueue, MessageBuffer readMessageBuffer,
                            MessageBuffer writeMessageBuffer, IMessageReaderFactory messageReaderFactory,
                            IMessageProcessor messageProcessor) throws IOException {
         this.inboundSocketQueue = inboundSocketQueue;
@@ -74,18 +75,23 @@ public class SocketProcessor implements Runnable {
         }
     }
 
-    public void executeCycle() throws IOException {
-        takeNewSockets();
-        readFromSockets();
-        writeToSockets();
+    private void executeCycle() throws IOException {
+        takeNewSockets();//得到socket
+        readFromSockets();//读取socket到buffer
+        writeToSockets();//从buffer写入socket
     }
 
-    public void takeNewSockets() throws IOException {
-        Socket newSocket = this.inboundSocketQueue.poll();
-
+    /**
+     * 从阻塞队列中拿到socket
+     *
+     * @throws IOException
+     */
+    private void takeNewSockets() throws IOException {
+        Socket newSocket = null;
+        newSocket = this.inboundSocketQueue.poll();
         while (newSocket != null) {
             newSocket.socketId = this.nextSocketId++;
-            newSocket.socketChannel.configureBlocking(false);
+            newSocket.socketChannel.configureBlocking(false); //设置为非阻塞io
 
             newSocket.messageReader = this.messageReaderFactory.createMessageReader();
             newSocket.messageReader.init(this.readMessageBuffer);
@@ -94,25 +100,27 @@ public class SocketProcessor implements Runnable {
 
             this.socketMap.put(newSocket.socketId, newSocket);
 
+            //打上标记
             SelectionKey key = newSocket.socketChannel.register(this.readSelector, SelectionKey.OP_READ);
             key.attach(newSocket);
 
-            newSocket = this.inboundSocketQueue.poll();
+            newSocket = this.inboundSocketQueue.poll(); //继续得到下一个
         }
     }
 
-    public void readFromSockets() throws IOException {
+    /**
+     * 将socket的内容读入缓冲区
+     *
+     * @throws IOException
+     */
+    private void readFromSockets() throws IOException {
         int readReady = this.readSelector.selectNow();
-
         if (readReady > 0) {
             Set<SelectionKey> selectedKeys = this.readSelector.selectedKeys();
             Iterator<SelectionKey> keyIterator = selectedKeys.iterator();
-
             while (keyIterator.hasNext()) {
                 SelectionKey key = keyIterator.next();
-
                 readFromSocket(key);
-
                 keyIterator.remove();
             }
             selectedKeys.clear();
@@ -143,7 +151,7 @@ public class SocketProcessor implements Runnable {
         }
     }
 
-    public void writeToSockets() throws IOException {
+    private void writeToSockets() throws IOException {
 
         // Take all new messages from outboundMessageQueue
         takeNewOutboundMessages();

@@ -11,7 +11,7 @@ import java.util.concurrent.BlockingQueue;
  * @date 2018-04-10
  * @apiNote 核心服务类, 管理工作线程与队列, 加载配置
  */
-public class NioServer {
+public class Server {
 
     private SocketAccepter socketAccepter = null;
     private SocketProcessor socketProcessor = null;
@@ -24,7 +24,7 @@ public class NioServer {
      * @param messageReaderFactory 工厂方法模式,生产得到messageReader,实现DI
      * @param messageProcessor     对Message进行处理
      */
-    public NioServer(int tcpPort, IMessageReaderFactory messageReaderFactory, IMessageProcessor messageProcessor) {
+    public Server(int tcpPort, IMessageReaderFactory messageReaderFactory, IMessageProcessor messageProcessor) {
         this.tcpPort = tcpPort;
         this.messageReaderFactory = messageReaderFactory;
         this.messageProcessor = messageProcessor;
@@ -42,7 +42,6 @@ public class NioServer {
         MessageBuffer writeBuffer = new MessageBuffer();
         this.socketProcessor = new SocketProcessor(socketQueue, readBuffer, writeBuffer, this.messageReaderFactory,
                 this.messageProcessor);
-
         // 单一线程,非阻塞IO
         Thread accepterThread = new Thread(this.socketAccepter);
         Thread processorThread = new Thread(this.socketProcessor);

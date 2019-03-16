@@ -33,15 +33,15 @@ public class Socket {
      * @throws IOException
      */
     public int read(ByteBuffer byteBuffer) throws IOException {
-        int bytesRead = this.socketChannel.read(byteBuffer);//非阻塞读取socket,没有读到则返回-1;
+        int bytesRead = this.socketChannel.read(byteBuffer);// 非阻塞读取socket,没有读到则返回-1;
         int totalBytesRead = bytesRead;
-        //socket自旋
+        // socket自旋
         while (bytesRead > 0) {
             bytesRead = this.socketChannel.read(byteBuffer);
             totalBytesRead += bytesRead;
         }
         if (bytesRead == -1) {
-            this.endOfStreamReached = true;//打上结束标记
+            this.endOfStreamReached = true;// 打上结束标记
         }
         return totalBytesRead;
     }
@@ -54,11 +54,11 @@ public class Socket {
      * @throws IOException
      */
     public int write(ByteBuffer byteBuffer) throws IOException {
-        int bytesWritten = this.socketChannel.write(byteBuffer); //非阻塞写入socket
+        int bytesWritten = this.socketChannel.write(byteBuffer); // 非阻塞写入socket
         int totalBytesWritten = bytesWritten;
-        //写入到socket了,并且缓冲区还存在数据
+        // 写入到socket了,并且缓冲区还存在数据
         while (bytesWritten > 0 && byteBuffer.hasRemaining()) {
-            //继续写入socket
+            // 继续写入socket
             bytesWritten = this.socketChannel.write(byteBuffer);
             totalBytesWritten += bytesWritten;
         }
