@@ -3,15 +3,15 @@ package com.pualrdwade.nioserver;
 import com.pualrdwade.nioserver.configure.ServerConfigure;
 
 import java.io.IOException;
-import java.util.Queue;
 import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 
 /**
  * @author PualrDWade
  * @date 2018-04-10
  * @apiNote 核心服务类, 管理工作线程与队列, 加载配置
  */
-public class Server {
+public class NioServer {
 
     private SocketAccepter socketAccepter = null;
     private SocketProcessor socketProcessor = null;
@@ -24,7 +24,7 @@ public class Server {
      * @param messageReaderFactory 工厂方法模式,生产得到messageReader,实现DI
      * @param messageProcessor     对Message进行处理
      */
-    public Server(int tcpPort, IMessageReaderFactory messageReaderFactory, IMessageProcessor messageProcessor) {
+    public NioServer(int tcpPort, IMessageReaderFactory messageReaderFactory, IMessageProcessor messageProcessor) {
         this.tcpPort = tcpPort;
         this.messageReaderFactory = messageReaderFactory;
         this.messageProcessor = messageProcessor;
@@ -34,14 +34,13 @@ public class Server {
         System.out.println("服务器开始启动...");
         // 创建socket队列
         System.out.println("初始化服务器配置...");
-        //创建Socket阻塞队列
-        Queue<Socket> socketQueue = new ArrayBlockingQueue<>(ServerConfigure.SOCKET_QUERE_CAPACITY);
+        //创建Socket阻塞队列,使用生产者/消费者模型共享阻塞队列
+        BlockingQueue<NioSocket> nioSocketQueue = new ArrayBlockingQueue<>(ServerConfigure.SOCKET_QUERE_CAPACITY);
         //初始化
-        this.socketAccepter = new SocketAccepter(tcpPort, socketQueue);
+        this.socketAccepter = new SocketAccepter(tcpPort, nioSocketQueue);
         MessageBuffer readBuffer = new MessageBuffer();
         MessageBuffer writeBuffer = new MessageBuffer();
-
-        this.socketProcessor = new SocketProcessor(socketQueue, readBuffer, writeBuffer, this.messageReaderFactory,
+        this.socketProcessor = new SocketProcessor(nioSocketQueue, readBuffer, writeBuffer, this.messageReaderFactory,
                 this.messageProcessor);
 
         // 单一线程,非阻塞IO

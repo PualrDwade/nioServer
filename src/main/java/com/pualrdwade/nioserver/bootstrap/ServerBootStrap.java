@@ -1,6 +1,6 @@
 package com.pualrdwade.nioserver.bootstrap;
 
-import com.pualrdwade.nioserver.Server;
+import com.pualrdwade.nioserver.NioServer;
 import com.pualrdwade.nioserver.configure.ServerConfigure;
 import com.pualrdwade.nioserver.http.HttpMessageProcessor;
 import com.pualrdwade.nioserver.http.HttpMessageReaderFactory;
@@ -16,7 +16,7 @@ public class ServerBootStrap {
 
     public static void main(String[] args) throws IOException {
         // 构造一个server,工厂方法模式,由于server需要分配不同的reader,为了DI原则所以注入一个工厂
-        Server server = new Server(ServerConfigure.TCP_LISTEN_PORT, new HttpMessageReaderFactory(), new HttpMessageProcessor());
-        server.start();
+        NioServer nioServer = new NioServer(ServerConfigure.TCP_LISTEN_PORT, new HttpMessageReaderFactory(), new HttpMessageProcessor());
+        nioServer.start();
     }
 }

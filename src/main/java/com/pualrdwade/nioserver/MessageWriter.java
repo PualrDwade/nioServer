@@ -25,12 +25,12 @@ public class MessageWriter {
         }
     }
 
-    public void write(Socket socket, ByteBuffer byteBuffer) throws IOException {
+    public void write(NioSocket nioSocket, ByteBuffer byteBuffer) throws IOException {
         byteBuffer.put(this.messageInProgress.sharedArray, this.messageInProgress.offset + this.bytesWritten,
                 this.messageInProgress.length - this.bytesWritten);
         byteBuffer.flip();
 
-        this.bytesWritten += socket.write(byteBuffer);
+        this.bytesWritten += nioSocket.write(byteBuffer);
         byteBuffer.clear();
 
         if (bytesWritten >= this.messageInProgress.length) {
