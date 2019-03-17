@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by jjenkov on 21-10-2015.
+ * @author PualrDwade
  */
 public class MessageWriter {
 

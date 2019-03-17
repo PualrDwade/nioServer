@@ -5,7 +5,7 @@ import java.nio.ByteBuffer;
 import java.util.List;
 
 /**
- * Created by jjenkov on 16-10-2015.
+ * @author PualrDwade
  */
 public interface IMessageReader {
 

@@ -1,7 +1,7 @@
 package com.pualrdwade.nioserver;
 
 /**
- * Created by jjenkov on 16-10-2015.
+ * @author PualrDwade
  */
 public interface IMessageReaderFactory {
 

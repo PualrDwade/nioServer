@@ -39,12 +39,8 @@ public class SocketAccepter implements Runnable {
                 SocketChannel socketChannel = this.serverSocket.accept();
                 System.out.println("Socket accepted: " + socketChannel);
                 // 放入socket阻塞队列中,生产者-消费者
-                //todo 检查队列是否可以放入更多的socket,目前直接使用阻塞队列进行阻塞
-                try {
-                    this.socketQueue.put(new Socket(socketChannel));
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
+                // todo 检查队列是否可以放入更多的socket,目前直接使用阻塞队列进行阻塞
+                this.socketQueue.add(new Socket(socketChannel));
             } catch (IOException e) {
                 e.printStackTrace();
             }

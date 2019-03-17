@@ -4,7 +4,7 @@ import com.pualrdwade.nioserver.IMessageReader;
 import com.pualrdwade.nioserver.IMessageReaderFactory;
 
 /**
- * Created by jjenkov on 18-10-2015.
+ * @author PualrDwade
  */
 public class HttpMessageReaderFactory implements IMessageReaderFactory {
 

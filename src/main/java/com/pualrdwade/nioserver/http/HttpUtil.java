@@ -3,7 +3,7 @@ package com.pualrdwade.nioserver.http;
 import java.io.UnsupportedEncodingException;
 
 /**
- * Created by jjenkov on 19-10-2015.
+ * @author PualrDwade
  */
 public class HttpUtil {
 
@@ -12,7 +12,7 @@ public class HttpUtil {
     private static final byte[] PUT = new byte[] { 'P', 'U', 'T' };
     private static final byte[] HEAD = new byte[] { 'H', 'E', 'A', 'D' };
     private static final byte[] DELETE = new byte[] { 'D', 'E', 'L', 'E', 'T', 'E' };
-    //暂时没有用到,将来需要使用
+    // 暂时没有用到,将来需要使用
     // private static final byte[] HOST = new byte[] { 'H', 'o', 's', 't' };
     private static final byte[] CONTENT_LENGTH = new byte[] { 'C', 'o', 'n', 't', 'e', 'n', 't', '-', 'L', 'e', 'n',
             'g', 't', 'h' };

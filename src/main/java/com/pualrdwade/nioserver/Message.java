@@ -3,7 +3,7 @@ package com.pualrdwade.nioserver;
 import java.nio.ByteBuffer;
 
 /**
- * Created by jjenkov on 16-10-2015.
+ * @author PualrDwade
  */
 public class Message {
 

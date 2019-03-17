@@ -43,8 +43,8 @@ public class SocketProcessor implements Runnable {
     private Set<Socket> nonEmptyToEmptySockets = new HashSet<>();
 
     public SocketProcessor(BlockingQueue<Socket> inboundSocketQueue, MessageBuffer readMessageBuffer,
-                           MessageBuffer writeMessageBuffer, IMessageReaderFactory messageReaderFactory,
-                           IMessageProcessor messageProcessor) throws IOException {
+            MessageBuffer writeMessageBuffer, IMessageReaderFactory messageReaderFactory,
+            IMessageProcessor messageProcessor) throws IOException {
         this.inboundSocketQueue = inboundSocketQueue;
 
         this.readMessageBuffer = readMessageBuffer;
@@ -63,22 +63,22 @@ public class SocketProcessor implements Runnable {
         while (true) {
             try {
                 executeCycle();
-            } catch (IOException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
 
             try {
-                Thread.sleep(100);
+                Thread.sleep(10);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         }
     }
 
-    private void executeCycle() throws IOException {
-        takeNewSockets();//得到socket
-        readFromSockets();//读取socket到buffer
-        writeToSockets();//从buffer写入socket
+    private void executeCycle() throws Exception {
+        takeNewSockets();// 得到socket
+        readFromSockets();// 读取socket到buffer
+        writeToSockets();// 从buffer写入socket
     }
 
     /**
@@ -86,25 +86,22 @@ public class SocketProcessor implements Runnable {
      *
      * @throws IOException
      */
-    private void takeNewSockets() throws IOException {
+    private void takeNewSockets() throws Exception {
         Socket newSocket = null;
         newSocket = this.inboundSocketQueue.poll();
         while (newSocket != null) {
             newSocket.socketId = this.nextSocketId++;
-            newSocket.socketChannel.configureBlocking(false); //设置为非阻塞io
+            newSocket.socketChannel.configureBlocking(false); // 设置为非阻塞io
 
             newSocket.messageReader = this.messageReaderFactory.createMessageReader();
             newSocket.messageReader.init(this.readMessageBuffer);
-
             newSocket.messageWriter = new MessageWriter();
 
             this.socketMap.put(newSocket.socketId, newSocket);
-
-            //打上标记
+            // 打上标记
             SelectionKey key = newSocket.socketChannel.register(this.readSelector, SelectionKey.OP_READ);
             key.attach(newSocket);
-
-            newSocket = this.inboundSocketQueue.poll(); //继续得到下一个
+            newSocket = this.inboundSocketQueue.poll(); // 继续得到下一个
         }
     }
 

@@ -3,7 +3,9 @@ package com.pualrdwade.nioserver;
 import java.util.Queue;
 
 /**
- * Created by jjenkov on 22-10-2015.
+ * 写操作中介者
+ * 
+ * @author PualrDwade
  */
 public class WriteProxy {
 
@@ -19,7 +21,7 @@ public class WriteProxy {
         return this.messageBuffer.getMessage();
     }
 
-    //将message放入队列
+    // 将message放入队列
     public boolean enqueue(Message message) {
         return this.writeQueue.offer(message);
     }
